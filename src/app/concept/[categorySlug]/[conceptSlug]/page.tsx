@@ -4,6 +4,7 @@ import { apiData } from '@/data/concepts';
 import styles from './page.module.css';
 import { Metadata } from 'next';
 import { codeToHtml } from 'shiki';
+import MermaidDiagram from '@/components/MermaidDiagram';
 
 type Props = {
   params: Promise<{ categorySlug: string; conceptSlug: string }>;
@@ -77,6 +78,13 @@ export default async function ConceptPage({ params }: Props) {
           {concept.description}
         </p>
       </header>
+
+      {/* Mermaid Diagram rendering */}
+      {concept.mermaidDiagram && (
+        <div className={styles.diagramContainer}>
+          <MermaidDiagram chart={concept.mermaidDiagram} />
+        </div>
+      )}
 
       <div className={styles.contentGrid}>
         <section className={styles.section}>

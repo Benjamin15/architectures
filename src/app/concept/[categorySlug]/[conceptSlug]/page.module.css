@@ -21,7 +21,7 @@
 }
 
 .header {
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
 }
 
 .title {
@@ -101,6 +101,16 @@
   background: var(--success);
 }
 
+.diagramContainer {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
 .codeSnippet {
   margin-top: 1.5rem;
   border-radius: 12px;
@@ -151,5 +161,5 @@
 
 .codeContent pre {
   margin: 0;
-  background-color: transparent !important; /* Let Shiki's theme handle it, but remove extra padding */
+  background-color: transparent !important;
 }

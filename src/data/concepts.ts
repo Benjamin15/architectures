@@ -11,6 +11,7 @@ export type Concept = {
   importance: string;
   howToApply: string;
   codeSnippet?: CodeSnippet;
+  mermaidDiagram?: string;
 };
 
 export type Category = {
@@ -26,7 +27,7 @@ export const apiData: Category[] = [
     id: "foundations",
     title: "Foundations",
     description: "Les bases fondamentales pour comprendre et concevoir des APIs robustes.",
-    color: "#10b981", // Emerald
+    color: "#10b981",
     concepts: [
       {
         id: "api-contract",
@@ -34,6 +35,10 @@ export const apiData: Category[] = [
         description: "Un accord formel entre le fournisseur de l'API et le consommateur, définissant comment l'API se comporte, les requêtes attendues et les réponses renvoyées.",
         importance: "Évite les malentendus entre les équipes front-end et back-end. Garantit que l'API est prévisible et fiable.",
         howToApply: "Utilisez des standards comme OpenAPI (Swagger) pour documenter et partager votre contrat avant même d'écrire le code (Design-First approach).",
+        mermaidDiagram: `graph LR
+    A[Frontend Developer] -->|Reads| C(API Contract OpenAPI)
+    B[Backend Developer] -->|Implements| C
+    A -.->|Calls API based on| C`,
         codeSnippet: {
           language: "yaml",
           title: "openapi.yaml",
@@ -61,7 +66,14 @@ paths:
         title: "Endpoints & URI Design",
         description: "L'art de concevoir des chemins (URLs) clairs, hiérarchiques et intuitifs pour accéder aux ressources de l'API.",
         importance: "Une bonne conception rend l'API auto-descriptive et facile à explorer pour les développeurs.",
-        howToApply: "Utilisez des noms au pluriel pour les ressources (ex: `/users` et non `/user`). Utilisez des hiérarchies claires (`/users/123/orders`). Évitez les verbes dans les URIs (`/get-users` ❌ -> `GET /users` ✅).",
+        howToApply: "Utilisez des noms au pluriel pour les ressources (ex: `/users` et non `/user`). Utilisez des hiérarchies claires (`/users/123/orders`). Évitez les verbes dans les URIs.",
+        mermaidDiagram: `graph TD
+    A[API Root /api] --> B[/users]
+    B --> C[/users/123]
+    C --> D[/users/123/orders]
+    D --> E[/users/123/orders/456]
+    style B fill:#10b981,stroke:#000,color:#fff
+    style D fill:#10b981,stroke:#000,color:#fff`,
         codeSnippet: {
           language: "http",
           title: "Exemple de bonnes et mauvaises URIs",
@@ -80,16 +92,21 @@ GET /users/123/orders`
         description: "Les verbes standardisés (GET, POST, PUT, PATCH, DELETE) indiquant l'action à effectuer sur une ressource.",
         importance: "Standardise les interactions et tire parti du protocole HTTP de manière sémantique.",
         howToApply: "GET pour lire, POST pour créer, PUT pour remplacer complètement, PATCH pour modifier partiellement, DELETE pour supprimer.",
+        mermaidDiagram: `graph LR
+    C[Client] -- GET /users --> S[Server: Read]
+    C -- POST /users --> S2[Server: Create]
+    C -- PUT /users/1 --> S3[Server: Replace]
+    C -- PATCH /users/1 --> S4[Server: Update partial]
+    C -- DELETE /users/1 --> S5[Server: Delete]`,
         codeSnippet: {
           language: "javascript",
           title: "app.js (Express)",
-          code: `// Exemple de mapping des méthodes HTTP en Express.js
-app.get('/articles', getArticles);          // Lire la liste
-app.post('/articles', createArticle);       // Créer un article
-app.get('/articles/:id', getArticle);       // Lire un article spécifique
-app.put('/articles/:id', replaceArticle);   // Remplacer entièrement l'article
-app.patch('/articles/:id', updateArticle);  // Mettre à jour quelques champs
-app.delete('/articles/:id', deleteArticle); // Supprimer l'article`
+          code: `app.get('/articles', getArticles);
+app.post('/articles', createArticle);
+app.get('/articles/:id', getArticle);
+app.put('/articles/:id', replaceArticle);
+app.patch('/articles/:id', updateArticle);
+app.delete('/articles/:id', deleteArticle);`
         }
       },
       {
@@ -97,22 +114,24 @@ app.delete('/articles/:id', deleteArticle); // Supprimer l'article`
         title: "HTTP Status Codes",
         description: "Codes numériques standardisés (2xx, 3xx, 4xx, 5xx) renvoyés par le serveur pour indiquer le résultat de la requête.",
         importance: "Permet aux clients de comprendre facilement si une requête a réussi ou d'identifier la nature de l'erreur sans parser le corps de la réponse.",
-        howToApply: "Utilisez 200 pour le succès, 201 pour la création, 400 pour une mauvaise requête client, 401/403 pour l'authentification/autorisation, 404 pour non trouvé, et 500 pour les erreurs serveur.",
+        howToApply: "Utilisez 200 pour le succès, 201 pour la création, 400 pour erreur client, 401/403 pour auth, 404 pour non trouvé, et 500 pour erreur serveur.",
+        mermaidDiagram: `pie title HTTP Status Code Categories
+    "2xx Success" : 40
+    "4xx Client Error" : 30
+    "5xx Server Error" : 20
+    "3xx Redirect" : 10`,
         codeSnippet: {
           language: "javascript",
           title: "userController.js",
           code: `app.post('/users', async (req, res) => {
   try {
     const user = await db.users.create(req.body);
-    // 201 Created
-    res.status(201).json(user);
+    res.status(201).json(user); // 201 Created
   } catch (error) {
     if (error.name === 'ValidationError') {
-      // 400 Bad Request
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message }); // 400 Bad Request
     } else {
-      // 500 Internal Server Error
-      res.status(500).json({ error: "Une erreur interne est survenue." });
+      res.status(500).json({ error: "Erreur interne" }); // 500 Server Error
     }
   }
 });`
@@ -124,6 +143,11 @@ app.delete('/articles/:id', deleteArticle); // Supprimer l'article`
         description: "Le format standardisé des données envoyées au serveur (requête) et reçues (réponse), incluant les headers et le body.",
         importance: "Une structure cohérente facilite le parsing et la gestion des données par les clients.",
         howToApply: "Maintenez une structure JSON uniforme. Pour les réponses, encapsulez souvent les données (ex: `{ \"data\": [...] }`) et standardisez la structure des erreurs.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: HTTP POST /api/data\\nHeaders: Content-Type: application/json\\nBody: { "name": "Alice" }
+    Server-->>Client: HTTP 201 Created\\nHeaders: Content-Type: application/json\\nBody: { "data": { "id": 1, "name": "Alice" } }`,
         codeSnippet: {
           language: "json",
           title: "Réponse standardisée JSON",
@@ -146,6 +170,13 @@ app.delete('/articles/:id', deleteArticle); // Supprimer l'article`
         description: "Mécanisme permettant au client et au serveur de s'accorder sur le format des données (ex: `application/json`, `application/xml`) via les headers `Accept` et `Content-Type`.",
         importance: "Permet à l'API de servir plusieurs formats sans changer l'URI, offrant plus de flexibilité.",
         howToApply: "Lisez le header `Accept` de la requête client et renvoyez le format approprié avec le bon header `Content-Type` dans la réponse.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: GET /report\\nAccept: application/pdf
+    Server-->>Client: 200 OK\\nContent-Type: application/pdf\\n[Binary PDF Data]
+    Client->>Server: GET /report\\nAccept: application/json
+    Server-->>Client: 200 OK\\nContent-Type: application/json\\n{ "report": "..." }`,
         codeSnippet: {
           language: "http",
           title: "Requête HTTP avec en-têtes de négociation",
@@ -167,6 +198,15 @@ Content-Length: 1048576
         description: "Principe selon lequel chaque requête d'un client au serveur doit contenir toutes les informations nécessaires pour être comprise et traitée, sans dépendre du contexte serveur.",
         importance: "Améliore grandement la scalabilité, car n'importe quel serveur peut traiter n'importe quelle requête sans avoir à synchroniser des sessions.",
         howToApply: "N'utilisez pas de sessions côté serveur. Utilisez des tokens (comme JWT) envoyés à chaque requête pour l'authentification et l'état de l'utilisateur.",
+        mermaidDiagram: `graph TD
+    subgraph Stateful (Bad)
+      C1[Client] -->|Req 1| S1(Server 1: session=A)
+      C1 -.->|Req 2 (Fails)| S2(Server 2: No session)
+    end
+    subgraph Stateless (Good)
+      C2[Client w/ Token] -->|Req 1 + Token| S3(Server 1)
+      C2 -->|Req 2 + Token| S4(Server 2)
+    end`,
         codeSnippet: {
           language: "http",
           title: "Exemple de requêtes Stateless",
@@ -189,7 +229,7 @@ Authorization: Bearer token_xyz123
     id: "styles-patterns",
     title: "API Styles & Patterns",
     description: "Les différents paradigmes et architectures pour construire et structurer vos APIs.",
-    color: "#3b82f6", // Blue
+    color: "#3b82f6",
     concepts: [
       {
         id: "rest",
@@ -197,6 +237,10 @@ Authorization: Bearer token_xyz123
         description: "Style d'architecture basé sur des ressources identifiées par des URIs et manipulées via les méthodes HTTP standard.",
         importance: "C'est le standard de facto du web, facile à comprendre, à cacher et hautement scalable.",
         howToApply: "Respectez les contraintes REST (Client-Serveur, Stateless, Cacheable, Interface Uniforme). Parfait pour les applications CRUD classiques.",
+        mermaidDiagram: `graph LR
+    C[Client] -->|GET /users| R1[User Resource]
+    C -->|POST /orders| R2[Order Resource]
+    C -->|DELETE /items/1| R3[Item Resource]`,
         codeSnippet: {
           language: "http",
           title: "Interactions REST classiques",
@@ -221,6 +265,13 @@ DELETE /users/123 HTTP/1.1 -> 204 No Content`
         description: "Modèle où le client exécute une fonction sur le serveur comme si c'était une fonction locale.",
         importance: "Simple pour des actions qui ne se mappent pas bien à des ressources (ex: `calculateTax()`).",
         howToApply: "Utilisez-le pour des APIs internes ou des actions complexes orientées processus, en passant les paramètres nécessaires dans le corps de la requête POST.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Server
+    Note over Client: result = calculateTax(100, "FR")
+    Client->>Server: POST /rpc\\n{ "method": "calculateTax", "params": [100, "FR"] }
+    Server-->>Client: 200 OK\\n{ "result": 120 }
+    Note over Client: print(result)`,
         codeSnippet: {
           language: "json",
           title: "Exemple de Payload JSON-RPC",
@@ -241,6 +292,9 @@ DELETE /users/123 HTTP/1.1 -> 204 No Content`
         description: "Un framework RPC moderne et performant développé par Google, utilisant HTTP/2 et Protocol Buffers (Protobuf).",
         importance: "Extrêmement rapide, fortement typé, parfait pour la communication inter-microservices.",
         howToApply: "Définissez vos services et messages dans des fichiers `.proto`, générez le code client/serveur automatiquement. Idéal pour les communications backend-à-backend.",
+        mermaidDiagram: `graph LR
+    A[Microservice A<br/>Node.js gRPC Client] -->|HTTP/2 Protobuf| B(Microservice B<br/>Go gRPC Server)
+    B -.->|Protobuf Response| A`,
         codeSnippet: {
           language: "protobuf",
           title: "service.proto",
@@ -268,6 +322,13 @@ message PaymentResponse {
         description: "Un langage de requête pour APIs permettant au client de demander exactement les données dont il a besoin, ni plus ni moins.",
         importance: "Résout les problèmes d'over-fetching et d'under-fetching de REST. Excellent pour les clients mobiles et les UIs complexes.",
         howToApply: "Exposez un seul endpoint. Définissez un schéma strict. Laissez les clients composer leurs requêtes pour assembler les données de multiples sources.",
+        mermaidDiagram: `graph TD
+    A[Client] -->|POST /graphql<br/>query { user { name, posts { title } } }| B(GraphQL Server)
+    B --> C[(Users DB)]
+    B --> D[(Posts API)]
+    C -.-> B
+    D -.-> B
+    B -.->|{ data: { user: { ... } } }| A`,
         codeSnippet: {
           language: "graphql",
           title: "Requête GraphQL",
@@ -289,6 +350,15 @@ message PaymentResponse {
         description: "Protocole permettant une communication bidirectionnelle, full-duplex et persistante entre le client et le serveur.",
         importance: "Essentiel pour les applications temps réel (chat, trading, jeux) où le serveur doit pousser des données au client sans que celui-ci ne les demande.",
         howToApply: "Établissez une connexion via le handshake HTTP (Upgrade), puis échangez des messages asynchrones en continu.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: HTTP GET /chat (Connection: Upgrade)
+    Server-->>Client: HTTP 101 Switching Protocols
+    Note over Client,Server: WebSocket Connection Established
+    Client->>Server: "Hello Server!" (Frame)
+    Server-->>Client: "New message from Alice" (Frame)
+    Server-->>Client: "User Bob typing..." (Frame)`,
         codeSnippet: {
           language: "javascript",
           title: "Client WebSocket en JavaScript",
@@ -311,19 +381,26 @@ ws.onmessage = (event) => {
         description: "Mécanisme de 'reverse API' où le serveur envoie un appel HTTP (généralement POST) à une URL client lorsqu'un événement se produit.",
         importance: "Évite au client de devoir faire du 'polling' (vérifier continuellement si des données ont changé), économisant des ressources.",
         howToApply: "Permettez à vos utilisateurs d'enregistrer des URLs de destination dans votre système. Lors d'un événement (ex: 'Paiement reçu'), envoyez un payload JSON à cette URL.",
+        mermaidDiagram: `sequenceDiagram
+    participant User
+    participant Stripe API
+    participant Your Server
+    User->>Stripe API: Pays for item
+    Note over Stripe API: Payment Succeeded
+    Stripe API->>Your Server: POST https://your-server.com/webhook\\n{ "event": "payment.success" }
+    Your Server-->>Stripe API: 200 OK
+    Your Server->>Your Server: Fulfill Order`,
         codeSnippet: {
           language: "javascript",
           title: "Serveur Node.js recevant un Webhook (Stripe)",
           code: `app.post('/webhook/stripe', express.raw({type: 'application/json'}), (req, res) => {
-  const event = req.body; // L'événement envoyé par Stripe
+  const event = req.body;
 
   if (event.type === 'payment_intent.succeeded') {
     const paymentIntent = event.data.object;
     console.log(\`Paiement de \${paymentIntent.amount} réussi !\`);
-    // Débloquer la commande...
   }
 
-  // Renvoie un 200 OK pour confirmer la réception
   res.status(200).send();
 });`
         }
@@ -334,6 +411,16 @@ ws.onmessage = (event) => {
         description: "La distinction entre des requêtes qui attendent la fin d'un processus (Sync) et celles qui initient un processus et renvoient un accusé de réception immédiatement (Async).",
         importance: "Empêche les timeouts HTTP et le blocage des threads serveurs pour les tâches lourdes (ex: génération de rapport).",
         howToApply: "Pour les tâches longues, renvoyez un HTTP 202 (Accepted) avec un header `Location` pointant vers un endpoint de statut, ou utilisez un Webhook pour notifier la fin.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: POST /reports/generate (Long task)
+    Server-->>Client: 202 Accepted\\nLocation: /reports/123/status
+    Note over Server: Processing report in background...
+    Client->>Server: GET /reports/123/status
+    Server-->>Client: 200 OK\\n{ "status": "processing" }
+    Client->>Server: GET /reports/123/status
+    Server-->>Client: 303 See Other\\nLocation: /reports/123/download`,
         codeSnippet: {
           language: "http",
           title: "Requête Asynchrone (HTTP 202)",
@@ -356,7 +443,7 @@ Retry-After: 30
     id: "contracts-testing-docs",
     title: "Contracts, Testing & Docs",
     description: "Les pratiques essentielles pour documenter, valider et tester la fiabilité de vos APIs.",
-    color: "#8b5cf6", // Violet
+    color: "#8b5cf6",
     concepts: [
       {
         id: "openapi",
@@ -364,6 +451,11 @@ Retry-After: 30
         description: "Un format standardisé (JSON ou YAML) pour décrire les capacités d'une API RESTful.",
         importance: "Génère automatiquement la documentation (ex: Swagger UI), les SDKs clients, et permet la validation.",
         howToApply: "Maintenez un fichier `openapi.yaml` à jour. Utilisez des outils comme Redoc ou Swagger UI pour générer des pages interactives pour vos développeurs.",
+        mermaidDiagram: `graph TD
+    A[openapi.yaml] --> B(Swagger UI / Redoc)
+    A --> C(Client SDK Generator)
+    A --> D(API Gateway Validation)
+    A --> E(Mock Servers)`,
         codeSnippet: {
           language: "yaml",
           title: "Extrait de schéma OpenAPI",
@@ -388,6 +480,11 @@ Retry-After: 30
         description: "La définition stricte de la forme des données entrantes et sortantes, et la vérification automatique que les requêtes s'y conforment.",
         importance: "Protège l'application contre les données malformées ou malveillantes, et garantit l'intégrité des données.",
         howToApply: "Utilisez des bibliothèques de validation (comme Zod en TS, Joi) connectées à vos routes pour rejeter avec un 400 Bad Request les payloads non conformes.",
+        mermaidDiagram: `graph LR
+    A[Incoming Request] --> B{Schema Validator}
+    B -->|Valid Data| C[Controller Logic]
+    B -->|Invalid Data| D[400 Bad Request]
+    style D fill:#ef4444,stroke:#000,color:#fff`,
         codeSnippet: {
           language: "typescript",
           title: "Validation avec Zod (TypeScript)",
@@ -412,6 +509,12 @@ app.post('/users', (req, res) => {
         description: "Des tests qui s'assurent que les consommateurs et les fournisseurs d'une API sont d'accord sur les interactions, basés sur un contrat partagé.",
         importance: "Détecte les 'breaking changes' avant le déploiement. Moins fragile que les tests end-to-end classiques.",
         howToApply: "Utilisez des outils comme Pact. Le client définit ses attentes (contrat), et le fournisseur valide qu'il peut y répondre correctement dans son CI/CD.",
+        mermaidDiagram: `graph TD
+    A[Consumer Tests] -->|Generates| B(Pact Contract File)
+    B --> C{Pact Broker}
+    D[Provider CI/CD] -->|Pulls Contract| C
+    D -->|Verifies API against| B
+    D -.->|Success/Fail| C`,
         codeSnippet: {
           language: "typescript",
           title: "Définition d'un contrat (Pact)",
@@ -437,6 +540,11 @@ app.post('/users', (req, res) => {
         description: "Rendre l'API facile à apprendre et à explorer grâce à une documentation claire, des tutoriels, et potentiellement du format HATEOAS.",
         importance: "L'adoption d'une API (surtout publique) dépend à 90% de la qualité de sa documentation.",
         howToApply: "Fournissez non seulement des références d'endpoints générées automatiquement, mais aussi des guides de démarrage (Getting Started), des exemples de code et une Sandbox.",
+        mermaidDiagram: `graph LR
+    A[Developer] -->|Reads| B(Getting Started Guide)
+    A -->|Explores| C(API Reference / Swagger)
+    A -->|Tests in| D(Interactive Sandbox)
+    A -->|Implements| E[Their Application]`,
         codeSnippet: {
           language: "json",
           title: "Exemple de Discoverability via HATEOAS (Liens Hypermedia)",
@@ -459,7 +567,7 @@ app.post('/users', (req, res) => {
     id: "auth-security",
     title: "Auth & Security",
     description: "Mécanismes pour protéger les données et s'assurer que seuls les utilisateurs autorisés peuvent effectuer des actions.",
-    color: "#ef4444", // Red
+    color: "#ef4444",
     concepts: [
       {
         id: "auth-vs-authz",
@@ -467,6 +575,15 @@ app.post('/users', (req, res) => {
         description: "L'Authentification (AuthN) vérifie *qui* vous êtes. L'Autorisation (AuthZ) vérifie *ce que vous avez le droit de faire*.",
         importance: "C'est la distinction fondamentale de toute sécurité applicative.",
         howToApply: "Vérifiez l'identité d'abord (login -> token). Ensuite, à chaque requête critique, vérifiez les permissions associées à ce token avant d'agir.",
+        mermaidDiagram: `flowchart TD
+    A[Request] --> B{AuthN: Who are you?}
+    B -->|Invalid Credentials| C[401 Unauthorized]
+    B -->|Valid User| D{AuthZ: Can you do this?}
+    D -->|Lacks Role| E[403 Forbidden]
+    D -->|Has Role| F[200 OK / Process Request]
+    style C fill:#ef4444,stroke:#000,color:#fff
+    style E fill:#ef4444,stroke:#000,color:#fff
+    style F fill:#10b981,stroke:#000,color:#fff`,
         codeSnippet: {
           language: "javascript",
           title: "Middleware Express (AuthN vs AuthZ)",
@@ -491,6 +608,12 @@ app.delete('/users/:id', requireAuth, requireAdmin, deleteUser);`
         description: "Des chaînes de caractères secrètes passées par le client pour identifier le projet ou l'application appelante.",
         importance: "Simple à implémenter pour des interactions machine-à-machine basiques ou des APIs publiques limitées.",
         howToApply: "Passez la clé via un header HTTP (ex: `X-API-Key`). Ne l'utilisez pas pour l'authentification d'utilisateurs humains individuels.",
+        mermaidDiagram: `sequenceDiagram
+    participant App
+    participant API Gateway
+    App->>API Gateway: GET /data\\nX-API-Key: 12345abcde
+    API Gateway->>API Gateway: Validate Key
+    API Gateway-->>App: 200 OK\\n{ "data": "..." }`,
         codeSnippet: {
           language: "http",
           title: "Utilisation d'une API Key",
@@ -505,6 +628,20 @@ X-API-Key: a1b2c3d4e5f6g7h8i9j0`
         description: "Un framework d'autorisation permettant à des applications tierces d'obtenir un accès limité à un service HTTP.",
         importance: "Le standard de l'industrie pour déléguer l'accès sans partager les mots de passe (ex: 'Se connecter avec Google').",
         howToApply: "Utilisez le flux d'Authorization Code (avec PKCE pour les clients publics) pour émettre des Access Tokens sécurisés.",
+        mermaidDiagram: `sequenceDiagram
+    participant User
+    participant Client App
+    participant Auth Server
+    participant Resource Server
+    User->>Client App: Click "Login"
+    Client App->>Auth Server: Redirect to /authorize?response_type=code
+    Auth Server->>User: Prompt for Login & Consent
+    User-->>Auth Server: Approve Access
+    Auth Server-->>Client App: Redirect with Auth Code
+    Client App->>Auth Server: POST /token (Exchange code for token)
+    Auth Server-->>Client App: Access Token
+    Client App->>Resource Server: GET /profile (Bearer Token)
+    Resource Server-->>Client App: Protected Data`,
         codeSnippet: {
           language: "http",
           title: "Requête d'Authorization Code OAuth2",
@@ -522,6 +659,12 @@ Host: server.example.com`
         description: "JSON Web Tokens : un format compact et autonome pour transmettre des informations sécurisées entre les parties sous forme d'objet JSON.",
         importance: "Permet une autorisation stateless. Le serveur peut valider le token mathématiquement sans interroger la base de données.",
         howToApply: "Signez vos JWTs avec un algorithme fort (RS256). Validez la signature, l'expiration (`exp`), et le public ciblé (`aud`) à chaque requête.",
+        mermaidDiagram: `graph LR
+    A[Header<br/>alg: HS256] --- B[Payload<br/>sub: 123<br/>role: admin]
+    B --- C[Signature<br/>HMAC-SHA256]
+    style A fill:#ef4444,stroke:#000,color:#fff
+    style B fill:#3b82f6,stroke:#000,color:#fff
+    style C fill:#10b981,stroke:#000,color:#fff`,
         codeSnippet: {
           language: "json",
           title: "Structure (Payload) d'un JWT décodé",
@@ -540,6 +683,15 @@ Host: server.example.com`
         description: "Le cryptage des données en transit entre le client et le serveur.",
         importance: "Rend impossible l'interception et la lecture des mots de passe, tokens ou données sensibles par des attaquants (Man-in-the-Middle).",
         howToApply: "N'acceptez JAMAIS de trafic non crypté (HTTP) en production. Redirigez systématiquement vers HTTPS. Utilisez HSTS.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: ClientHello (Supported Ciphers)
+    Server-->>Client: ServerHello (Chosen Cipher, Certificate)
+    Client->>Client: Verify Certificate
+    Client->>Server: Key Exchange (Encrypted with Public Key)
+    Server->>Server: Decrypt with Private Key
+    Note over Client,Server: Secure Encrypted Tunnel Established`,
         codeSnippet: {
           language: "http",
           title: "Strict-Transport-Security (HSTS)",
@@ -554,7 +706,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
     id: "design-evolution",
     title: "Design & Evolution",
     description: "Concevoir des APIs flexibles, durables et capables d'évoluer sans casser les clients existants.",
-    color: "#0ea5e9", // Light blue
+    color: "#0ea5e9",
     concepts: [
       {
         id: "resource-modeling",
@@ -562,6 +714,20 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
         description: "Le processus d'identification des entités métier et de leurs relations pour les exposer de manière cohérente.",
         importance: "Définit la 'forme' de votre API. Un mauvais modèle rend l'API compliquée et inefficace.",
         howToApply: "Pensez en termes de noms et non de verbes. Identifiez les ressources principales et les sous-ressources.",
+        mermaidDiagram: `erDiagram
+    AUTHOR ||--o{ POST : writes
+    POST ||--o{ COMMENT : has
+    AUTHOR {
+      string id
+      string name
+    }
+    POST {
+      string id
+      string title
+    }
+    COMMENT {
+      string text
+    }`,
         codeSnippet: {
           language: "http",
           title: "Relations entre ressources",
@@ -578,6 +744,10 @@ POST /users/123/suspend`
         description: "Diviser de larges ensembles de résultats en pages plus petites.",
         importance: "Améliore les performances de l'API et réduit la consommation de bande passante.",
         howToApply: "Utilisez la pagination Offset (ex: `?limit=20&offset=40`) pour la simplicité, ou la pagination par Curseur pour la performance sur de grands datasets.",
+        mermaidDiagram: `graph LR
+    A[Dataset 1000 items] --> B(Page 1: limit=10, offset=0)
+    A --> C(Page 2: limit=10, offset=10)
+    A --> D(Page 3: limit=10, offset=20)`,
         codeSnippet: {
           language: "http",
           title: "Requête avec Pagination Offset",
@@ -591,6 +761,10 @@ Host: api.example.com`
         description: "Méthodologie pour introduire des changements majeurs (breaking changes) sans impacter les utilisateurs existants.",
         importance: "Garantit que les applications clientes continuent de fonctionner pendant que l'API évolue.",
         howToApply: "Préférez le versioning via l'URI (`/v1/users`) ou via l'en-tête (Header Accept). Supportez plusieurs versions simultanément.",
+        mermaidDiagram: `graph TD
+    A[API Gateway] --> B{Version router}
+    B -->|/v1/*| C[Legacy Backend v1]
+    B -->|/v2/*| D[Modern Backend v2]`,
         codeSnippet: {
           language: "http",
           title: "Stratégies de Versioning",
@@ -611,6 +785,11 @@ GET /users?version=1.0 HTTP/1.1`
         description: "Assurer que les modifications n'invalident pas le contrat existant, et gérer le retrait progressif des anciennes fonctionnalités.",
         importance: "Maintient la confiance des développeurs qui consomment votre API.",
         howToApply: "Ajouter des champs est sûr. Supprimer ou renommer des champs est une rupture. Utilisez des en-têtes `Sunset` et `Deprecation` pour avertir les clients.",
+        mermaidDiagram: `timeline
+    title Deprecation Lifecycle
+    January : API v2 Launched : v1 marked as Deprecated
+    July : Brownout Tests : Occasional v1 downtime to warn users
+    December : Sunset : API v1 is permanently turned off`,
         codeSnippet: {
           language: "http",
           title: "Avertissement de dépréciation (Headers)",
@@ -626,7 +805,7 @@ Link: <https://developer.example.com/v2-migration>; rel="deprecation"`
     id: "ops-observability",
     title: "Ops & Observability",
     description: "Les outils et pratiques pour surveiller la santé, les performances et l'utilisation de vos APIs en production.",
-    color: "#f59e0b", // Amber
+    color: "#f59e0b",
     concepts: [
       {
         id: "api-observability",
@@ -634,6 +813,12 @@ Link: <https://developer.example.com/v2-migration>; rel="deprecation"`
         description: "La capacité de comprendre l'état interne du système à partir de ses sorties externes (Logs, Metrics, Traces).",
         importance: "Indispensable pour débugger les problèmes en production et comprendre les goulots d'étranglement.",
         howToApply: "Implémentez le traçage distribué (OpenTelemetry). Collectez des métriques sur la latence, les taux d'erreur et le trafic (les piliers RED).",
+        mermaidDiagram: `graph TD
+    A[Microservice A] -->|Trace ID: 123| B(Microservice B)
+    B -->|Trace ID: 123| C(Database)
+    A -.-> D[Central Logging / Datadog]
+    B -.-> D
+    C -.-> D`,
         codeSnippet: {
           language: "json",
           title: "Exemple de Log Structuré",
@@ -653,6 +838,13 @@ Link: <https://developer.example.com/v2-migration>; rel="deprecation"`
         description: "Un composant serveur qui agit comme point d'entrée unique pour toutes les requêtes des clients vers divers services backend.",
         importance: "Centralise des responsabilités comme le routage, l'authentification, le rate limiting et la collecte de métriques.",
         howToApply: "Placez une passerelle (ex: Kong, AWS API Gateway) devant vos microservices. N'y mettez pas de logique métier complexe.",
+        mermaidDiagram: `graph TD
+    A[Mobile Client] -->|Requests| G{API Gateway}
+    B[Web Client] -->|Requests| G
+    G -->|Routes to| S1(Auth Service)
+    G -->|Routes to| S2(Product Service)
+    G -->|Routes to| S3(Order Service)
+    style G fill:#f59e0b,stroke:#000,color:#fff`,
         codeSnippet: {
           language: "yaml",
           title: "Configuration d'une route API Gateway",
@@ -676,7 +868,7 @@ Link: <https://developer.example.com/v2-migration>; rel="deprecation"`
     id: "reliability-performance",
     title: "Reliability & Performance",
     description: "Techniques pour rendre les APIs résilientes aux pannes, rapides et capables de gérer une forte charge.",
-    color: "#8b5cf6", // Purple
+    color: "#8b5cf6",
     concepts: [
       {
         id: "timeouts",
@@ -684,6 +876,14 @@ Link: <https://developer.example.com/v2-migration>; rel="deprecation"`
         description: "Une limite de temps définie pendant laquelle le client ou le serveur attendra une réponse avant d'abandonner.",
         importance: "Empêche les ressources du système de rester bloquées indéfiniment en cas de panne réseau ou de backend lent.",
         howToApply: "Configurez des timeouts stricts côté client ET côté serveur. Renvoyez une erreur 504 (Gateway Timeout) lorsque cela se produit.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: Request Data
+    Note over Server: Server is stuck...
+    Note over Client: 5 seconds pass
+    Client--xClient: Timeout Triggered! (Cancel request)
+    Client->>User: Show Error Message`,
         codeSnippet: {
           language: "javascript",
           title: "Timeout côté client (Axios)",
@@ -709,6 +909,14 @@ try {
         description: "Une stratégie de répétition des requêtes échouées, en augmentant progressivement le délai d'attente (backoff) et en ajoutant de l'aléatoire (jitter).",
         importance: "Permet de surmonter les erreurs réseau transitoires sans créer une tempête de requêtes (Thundering Herd) qui achèverait un service en difficulté.",
         howToApply: "Côté client, si une requête échoue avec un code 5xx, réessayez après 1s, puis 2s, puis 4s, en ajoutant un temps aléatoire (ex: ±20%).",
+        mermaidDiagram: `graph TD
+    A[Initial Request] -->|Fails (503)| B(Wait 1s + Jitter)
+    B --> C[Retry 1]
+    C -->|Fails (503)| D(Wait 2s + Jitter)
+    D --> E[Retry 2]
+    E -->|Fails (503)| F(Wait 4s + Jitter)
+    F --> G[Retry 3]
+    G -->|Success (200)| H[Done]`,
         codeSnippet: {
           language: "javascript",
           title: "Algorithme d'Exponential Backoff avec Jitter",
@@ -728,6 +936,15 @@ try {
         description: "La propriété d'une opération qui produit le même résultat, qu'elle soit exécutée une ou plusieurs fois.",
         importance: "Crucial pour les requêtes de création (comme les paiements). Si le client réessaie suite à un timeout réseau, l'action ne doit pas être dupliquée.",
         howToApply: "Utilisez un header `Idempotency-Key` (généré par le client). Le serveur vérifie si cette clé a déjà été traitée ; si oui, il renvoie la réponse précédente.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant Payment API
+    Client->>Payment API: POST /charge (Key: XYZ-123)
+    Payment API--xClient: Network Timeout! (But payment succeeded)
+    Note over Client: Client retries...
+    Client->>Payment API: POST /charge (Key: XYZ-123)
+    Note over Payment API: Key XYZ-123 already processed
+    Payment API-->>Client: 200 OK (Returns cached result)`,
         codeSnippet: {
           language: "http",
           title: "Requête avec Clé d'Idempotence",
@@ -747,6 +964,11 @@ Idempotency-Key: 8a9b7c6d-1234-abcd-9876-ef1234567890
         description: "Restreindre le nombre de requêtes qu'un client peut effectuer sur une période donnée.",
         importance: "Protège l'API contre les abus (DDoS accidentel ou malveillant) et garantit une utilisation équitable des ressources.",
         howToApply: "Implémentez-le au niveau de l'API Gateway. Renvoyez un code 429 (Too Many Requests) avec des headers indiquant quand le client peut réessayer (`Retry-After`).",
+        mermaidDiagram: `flowchart TD
+    A[Client Request] --> B{API Gateway Rate Limiter}
+    B -->|Within Quota (Req < 100/min)| C[Process Request]
+    B -->|Quota Exceeded| D[Return 429 Too Many Requests]
+    style D fill:#ef4444,stroke:#000,color:#fff`,
         codeSnippet: {
           language: "http",
           title: "Réponse HTTP de Rate Limiting",
@@ -767,6 +989,16 @@ Retry-After: 3600
         description: "Le stockage de copies des réponses HTTP afin de les réutiliser pour les requêtes ultérieures sans repasser par le backend.",
         importance: "Réduit drastiquement la latence et la charge sur les serveurs.",
         howToApply: "Utilisez les headers `Cache-Control` (ex: `max-age`) et `ETag`. Exploitez les CDNs et les caches des navigateurs pour les données statiques ou peu changeantes.",
+        mermaidDiagram: `sequenceDiagram
+    participant Client
+    participant CDN Cache
+    participant Origin Server
+    Client->>CDN Cache: GET /image.png
+    CDN Cache-->>Client: Cache Hit! (Returns immediately)
+    Client->>CDN Cache: GET /api/data
+    CDN Cache->>Origin Server: Cache Miss! Forward Request
+    Origin Server-->>CDN Cache: 200 OK + Cache-Control: max-age=3600
+    CDN Cache-->>Client: Returns Data & Caches it`,
         codeSnippet: {
           language: "http",
           title: "Headers de Cache HTTP",
