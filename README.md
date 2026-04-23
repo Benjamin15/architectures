@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# API Architecture Concepts
 
-## Getting Started
+Une plateforme éducative interactive construite avec **Next.js** pour explorer, comprendre et maîtriser les concepts fondamentaux de l'architecture d'APIs. Basé sur l'infographie *"API Concepts Every Software Engineer Should Know"*.
 
-First, run the development server:
+🌍 **[Voir le site en direct](https://Benjamin15.github.io/architectures/)**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Fonctionnalités Principales
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **🗺️ Mindmap Complète** : 7 grandes catégories couvrant tous les aspects des APIs (Fondations, Styles, Tests, Sécurité, Design, Observabilité, Performance).
+- **📝 45 Concepts Détaillés** : Explication claire, importance métier, et bonnes pratiques d'application pour chaque notion.
+- **💻 Exemples de Code Dynamiques** : Coloration syntaxique premium côté serveur (via **Shiki**) pour les extraits de code, requêtes HTTP, et configurations.
+- **📊 Diagrammes Interactifs** : Chaque concept est illustré par un schéma généré dynamiquement dans le navigateur via **Mermaid.js** (diagrammes de séquence, graphes de flux, etc.).
+- **🎨 Design Premium** : Interface en "Dark Mode" utilisant du CSS natif (Vanilla CSS) avec des effets de *Glassmorphism* et des animations fluides.
+- **⚡ Ultra Rapide (SSG)** : Toutes les pages sont pré-rendues statiquement lors de la compilation pour des performances optimales et un SEO parfait.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Stack Technique
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework** : Next.js 16 (App Router)
+- **Langage** : TypeScript
+- **Styling** : CSS Modules / Vanilla CSS (sans Tailwind)
+- **Syntax Highlighting** : Shiki
+- **Diagrammes** : Mermaid.js
+- **Déploiement** : GitHub Actions & GitHub Pages
 
-## Learn More
+## 🚀 Installation & Lancement Local
 
-To learn more about Next.js, take a look at the following resources:
+1. **Cloner le dépôt** :
+   ```bash
+   git clone https://github.com/Benjamin15/architectures.git
+   cd architectures
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Installer les dépendances** :
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Lancer le serveur de développement** :
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+4. Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur pour voir le résultat.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📦 Déploiement
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ce projet est configuré pour se déployer automatiquement sur **GitHub Pages** via une GitHub Action (`.github/workflows/deploy.yml`).
+
+À chaque \`push\` sur la branche \`master\`, l'application est compilée en tant que site statique (\`output: "export"\`) et publiée.
+Le chemin de base (\`basePath\`) est automatiquement géré dans \`next.config.ts\` pour correspondre au sous-domaine de GitHub Pages.
