@@ -1,0 +1,155 @@
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 3rem;
+  font-size: 0.95rem;
+}
+
+.breadcrumb a {
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: var(--text-primary);
+}
+
+.separator {
+  color: var(--border-color);
+}
+
+.header {
+  margin-bottom: 4rem;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.categoryTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--tag-bg);
+  color: var(--tag-color);
+}
+
+.contentGrid {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+  .contentGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.section {
+  padding: 2.5rem;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+}
+
+.sectionFull {
+  grid-column: 1 / -1;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionTitle::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
+
+.text {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+.howToApply {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.howToApply .sectionTitle::before {
+  background: var(--success);
+}
+
+.codeSnippet {
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.codeHeader {
+  background: #1e1e1e;
+  padding: 0.75rem 1rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.macDots {
+  display: flex;
+  gap: 6px;
+  margin-right: 12px;
+}
+
+.macDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.macDotRed { background-color: #ff5f56; }
+.macDotYellow { background-color: #ffbd2e; }
+.macDotGreen { background-color: #27c93f; }
+
+.codeTitle {
+  color: #ccc;
+  margin-left: auto;
+}
+
+.codeContent {
+  padding: 1.5rem;
+  overflow-x: auto;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background-color: #121212; /* Fallback */
+}
+
+.codeContent pre {
+  margin: 0;
+  background-color: transparent !important; /* Let Shiki's theme handle it, but remove extra padding */
+}

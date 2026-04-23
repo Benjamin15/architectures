@@ -1,65 +1,54 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { apiData } from '@/data/concepts';
+import styles from './page.module.css';
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      <header className={styles.header}>
+        <h1 className={styles.title}>
+          <span className="text-gradient">API Architecture</span> Concepts
+        </h1>
+        <p className={styles.subtitle}>
+          Un guide interactif pour maîtriser les fondations, les patterns et les meilleures pratiques de conception d'APIs.
+        </p>
+      </header>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3">
+        {apiData.map((category, index) => (
+          <Link 
+            href={`/category/${category.id}`} 
+            key={category.id}
+            className={`glass-panel ${styles.categoryCard}`}
+            style={{ animationDelay: `${index * 50}ms` }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <div className={styles.categoryHeader}>
+              <div 
+                className={styles.iconPlaceholder}
+                style={{ '--card-color': category.color } as React.CSSProperties}
+              >
+                {category.title.charAt(0)}
+              </div>
+              <h2 className={styles.categoryTitle}>{category.title}</h2>
+            </div>
+            
+            <p className={styles.categoryDesc}>
+              {category.description}
+            </p>
+
+            <div className={styles.conceptPills}>
+              {category.concepts.slice(0, 3).map(concept => (
+                <span key={concept.id} className={styles.pill}>
+                  {concept.title}
+                </span>
+              ))}
+              {category.concepts.length > 3 && (
+                <span className={styles.pill}>+{category.concepts.length - 3}</span>
+              )}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </>
   );
 }
